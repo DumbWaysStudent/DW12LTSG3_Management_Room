@@ -7,13 +7,15 @@ import RootNavigator from './../../navigator'
 const reducerRouter = createNavigationReducer(RootNavigator)
 //Login
 import reducerUser from './../reducers/reducersUser'
-//Romo
+//Room
 import reducerRoom from './../reducers/reducersRoom'
-
+//Customer
+import reducersCustomer from './../reducers/reducersCustomer'
 const appReducer = combineReducers({
     router: reducerRouter,
     users: reducerUser,
-    room: reducerRoom
+    room: reducerRoom,
+    customer: reducersCustomer
 })
 
 export default appReducer

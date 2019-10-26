@@ -95,5 +95,20 @@ export const styles = StyleSheet.create({
   },
   titleEdit:{
     fontSize: 20,
+  },
+  nameC: {
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  idcardC: {
+    fontSize: 16,
+  },
+  phonenumberC: {
+    fontSize: 16
+  },
+  cardright: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginLeft: 0,
   }
 })
