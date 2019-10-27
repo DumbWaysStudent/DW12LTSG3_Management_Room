@@ -16,9 +16,11 @@ import {
     Container,
     Text,
     Button,
-    Flatlist,
     Input,
-    Item
+    Item,
+    Left,
+    Body,
+    ListItem
 } from 'native-base'
 
 class Room extends Component {
@@ -40,7 +42,7 @@ class Room extends Component {
         })
         this.props.GetAllRoom(token)
     }
-    Edit(e) {
+    edit(e) {
         const data = this.props.room.room
         const filter = data.filter(function (item) {
             const itemData = item.id == e
@@ -52,39 +54,81 @@ class Room extends Component {
             isLoading: false
         })
     }
-    Add() {
+    update = () => {
+        const token = this.state.token
+        this.props.GetAllRoom(token)
+    }
+    add() {
         this.setState({
             visible: 'bottom'
         })
     }
+    saveEdit() {
+        this.props.EditRoom({
+            id: this.state.data[0].id,
+            name: this.state.name,
+            token: this.state.token
+        })
+        this.setState({ visibleModal: null })
+        const token = this.state.token
+        this.props.GetAllRoom(token)
+    }
+    save() {
+        this.props.AddRoom({
+            name: this.state.name,
+            token: this.state.token
+        })
+        this.setState({
+            visible: null,
+            name: ''
+        })
+        const token = this.state.token
+        this.props.GetAllRoom(token)
+    }
     render() {
-        const { isLoading} = this.state
+        const { isLoading } = this.state
+        const { isSuccess } = this.props.room
+        const Isloading = this.props.room.isLoading
         return (
             <Container>
-                <Text style={styles.title}>Room</Text>
-                <FlatGrid
-                    itemDimension={130}
-                    items={this.props.room.room}
-                    style={styles.gridView}
-                    // staticDimension={300}
-                    // fixed
-                    // spacing={20}
-                    renderItem={({ item, index }) => (
-                        <TouchableOpacity
-                            onPress={() => this.Edit(item.id)}
+                <ListItem>
+                    <Left>
+                        <Text style={styles.titleR}>Room</Text>
+                    </Left>
+                    <Body>
+                        <Button
+                            style={styles.btnRoom}
+                            block
+                            small
+                            rounded
+                            onPress={() => this.add()}
                         >
-                            <View style={[styles.itemContainer, { backgroundColor: '#2ecc71' }]}>
-                                <Text style={styles.itemName}>{item.name}</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                    )}
-                />
-                <Button
-                    onPress={() => this.Add()}
-                >
-                    <Text>Add Room</Text>
-                </Button>
+                            <Text>Add Room</Text>
+                        </Button>
+                    </Body>
+                </ListItem>
+                {
+                    Isloading == false ?
+                        <FlatGrid
+                            itemDimension={130}
+                            items={this.props.room.room}
+                            style={styles.gridView}
+                            renderItem={({ item, index }) => (
+                                <TouchableOpacity
+                                    onPress={() => this.edit(item.id)}
+                                >
+                                    <View style={[styles.itemContainer, { backgroundColor: '#2ecc71' }]}>
+                                        <Text style={styles.itemName}>{item.name}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                        :
+                        <Container style={styles.center}>
+                            <ActivityIndicator size='large' />
+                            <Text>Please Wait...</Text>
+                        </Container>
+                }
                 <Modal
                     isVisible={this.state.visibleModal}
                     onSwipeComplete={() => this.setState({ visibleModal: null })}
@@ -95,13 +139,13 @@ class Room extends Component {
                         <Text style={styles.titleEdit}>EDIT ROOM</Text>
                         <Item>
                             <Input
-                            defaultValue={isLoading == false ? this.state.data[0].name : null}
-                                onChangeText={(text)=>this.setState({name: text})}
+                                defaultValue={isLoading == false ? this.state.data[0].name : null}
+                                onChangeText={(text) => this.setState({ name: text })}
                             />
                         </Item>
                     </View>
                     <Button
-                        onPress={() => this.SaveEdit()}
+                        onPress={() => this.saveEdit()}
                         style={styles.addbutton}
                         success
                         full>
@@ -133,7 +177,7 @@ class Room extends Component {
                             />
                         </Item>
                         <Button
-                            onPress={() => this.Save()}
+                            onPress={() => this.save()}
                             style={styles.addbutton}
                             success
                             full>
@@ -150,28 +194,6 @@ class Room extends Component {
                 </Modal>
             </Container>
         )
-    }
-    SaveEdit() {
-        this.props.EditRoom({
-            id: this.state.data[0].id,
-            name: this.state.name,
-            token: this.state.token
-        })
-        this.setState({ visibleModal: null })
-        const token =this.state.token
-        this.props.GetAllRoom(token)
-    }
-    Save() {
-        this.props.AddRoom({
-            name: this.state.name,
-            token: this.state.token
-        })
-        this.setState({ 
-            visible: null,
-            name: ''
-         })
-        const token = this.state.token
-        this.props.GetAllRoom(token)
     }
 }
 

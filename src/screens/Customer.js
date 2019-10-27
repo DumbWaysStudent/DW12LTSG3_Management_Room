@@ -52,12 +52,16 @@ class CustomerScreen extends Component {
         })
         this.props.GetAllCustomer(token)
     }
-    ShowAddModel() {
+    update = () => {
+        const token = this.state.token
+        this.props.GetAllCustomer(token)
+    }
+    showAddModel() {
         this.setState({
             visible: 'bottom'
         })
     }
-    Save() {
+    save() {
         this.props.AddCustomer({
             name: this.state.name,
             id_card: this.state.idcard,
@@ -65,20 +69,15 @@ class CustomerScreen extends Component {
             image: this.state.image,
             token: this.state.token
         })
-        const token = this.state.token
-        const {isLoadingA , isSuccessA} = this.props.customer
-        if (isLoadingA == false && isSuccessA) {
-            const token = this.state.token
-            this.props.GetAllCustomer(token)
-        }
         this.setState({
             name: '',
             id_card: '',
             phone_number: '',
             image: '',
         })
+        this.update()
     }
-    ShowEdit(e) {
+    showEdit(e) {
         const data = this.props.customer.customer
         const filter = data.filter(function (item) {
             const itemData = item.id == e
@@ -90,7 +89,7 @@ class CustomerScreen extends Component {
             isLoading: false
         })
     }
-    SaveEdit() {
+    saveEdit() {
         this.props.EditCustomer({
             id: this.state.data[0].id,
             name: this.state.name,
@@ -99,42 +98,52 @@ class CustomerScreen extends Component {
             image: this.state.image,
             token: this.state.token
         })
-        const {isLoadingE , isSuccessE} = this.props.customer
-        if (isLoadingE == false && isSuccessE) {
-            const token = this.state.token
-            this.props.GetAllCustomer(token)
-        }
         this.setState({
             visibleE: null,
             isLoading: true
         })
+        this.update()
     }
     render() {
         const { isLoading } = this.state
+        const isLoadingA = this.props.customer.isLoading
         return (
             <Container>
                 <Text style={styles.title}>
                     Customers
                 </Text>
-                <FlatList
-                    data={this.props.customer.customer}
-                    renderItem={({ item, index }) => (
-                        <List key={item.id}>
-                            <ListItem thumbnail onPress={() => this.ShowEdit(item.id)}>
-                                <Left>
-                                    <Thumbnail square />
-                                </Left>
-                                <Body>
-                                    <Text>{item.name}</Text>
-                                    <Text note numberOfLines={1}>ID CARD : {item.id_card}</Text>
-                                    <Text note numberOfLines={2}>Phone Number :{item.phone_number}</Text>
-                                </Body>
-                            </ListItem>
-                        </List>
-                    )}
-                />
-                <Fab position='bottomRight'
-                    onPress={() => this.ShowAddModel()}
+                {
+                    isLoadingA == false ?
+                        <FlatList
+                            keyExtractor={(item, index) => index.toString()}
+                            refreshing={isLoadingA}
+                            onRefresh={this.update}
+                            data={this.props.customer.customer}
+                            renderItem={({ item, index }) => (
+                                <List key={item.id}>
+                                    <ListItem thumbnail onPress={() => this.showEdit(item.id)}>
+                                        <Left>
+                                            <Thumbnail square />
+                                        </Left>
+                                        <Body>
+                                            <Text>{item.name}</Text>
+                                            <Text note numberOfLines={1}>ID CARD : {item.id_card}</Text>
+                                            <Text note numberOfLines={2}>Phone Number :{item.phone_number}</Text>
+                                        </Body>
+                                    </ListItem>
+                                </List>
+                            )}
+                        />
+                        :
+                        <Container style={styles.center}>
+                            <ActivityIndicator size='large' />
+                            <Text>Please Wait...</Text>
+                        </Container>
+                }
+                <Fab
+                    position='bottomRight'
+                    onPress={() => this.showAddModel()}
+                    style={{backgroundColor: '#4b4b4b'}}
                 >
                     <Icon name='ios-add' />
                 </Fab>
@@ -175,7 +184,7 @@ class CustomerScreen extends Component {
                             <Button><Text>ADD IMAGE</Text></Button>
                         </Item>
                         <Button
-                            onPress={() => this.Save()}
+                            onPress={() => this.save()}
                             style={styles.addbutton}
                             success
                             full>
@@ -190,6 +199,7 @@ class CustomerScreen extends Component {
                         </Button>
                     </View>
                 </Modal>
+
                 {/* MODAL EDIT */}
                 <Modal
                     isVisible={this.state.visibleE}
@@ -229,7 +239,7 @@ class CustomerScreen extends Component {
                             <Button><Text>ADD IMAGE</Text></Button>
                         </Item>
                         <Button
-                            onPress={() => this.SaveEdit()}
+                            onPress={() => this.saveEdit()}
                             style={styles.addbutton}
                             success
                             full>

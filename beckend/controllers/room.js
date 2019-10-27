@@ -2,7 +2,11 @@ const Room = require('../models').room
 
 //GET ALL ROOM
 exports.index = (req, res) =>{
-    Room.findAll()
+    Room.findAll({
+        order: [
+            ['createdAt', 'DESC']
+        ]
+    })
     .then(function(result){
         res.send(result)
     })
@@ -22,6 +26,7 @@ exports.store = (req, res) => {
     })
     .then(function(result){
         res.send({
+            result,
             message: `Room has Created with name ${result.name}`
         })
     })
@@ -45,6 +50,7 @@ exports.update = (req, res) => {
     })
     .then(function(result){
         res.send({
+            name,
             message: `Room with id ${id} has be updated`
         })
     })

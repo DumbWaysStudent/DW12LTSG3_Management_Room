@@ -28,7 +28,10 @@ const TabNavigator = createBottomTabNavigator({
                     fontSize: 14,
                 },
             },
-            tabBarLabel: 'Check In'
+            tabBarLabel: 'Check In',
+            tabBarIcon: ({ tintColor }) => (
+                <Icon name="checklist" size={40} style={{ color: tintColor }} type='Octicons' />
+            )
         },
     },
     Room: {
@@ -40,7 +43,10 @@ const TabNavigator = createBottomTabNavigator({
                     fontSize: 14,
                 },
             },
-            tabBarLabel: 'Room'
+            tabBarLabel: 'Room',
+            tabBarIcon: ({ tintColor }) => (
+                <Icon name="bed" size={40} style={{ color: tintColor }} type='FontAwesome' />
+            )
         },
     },
     Customer: {
@@ -52,9 +58,12 @@ const TabNavigator = createBottomTabNavigator({
                     fontSize: 14,
                 },
             },
-            tabBarLabel: 'Customer'
+            tabBarLabel: 'Customer',
+            tabBarIcon: ({ tintColor }) => (
+                <Icon name="customerservice" size={40} style={{ color: tintColor }} type='AntDesign' />
+            )
         }
-    }, 
+    },
     Setting: {
         screen: SettingScreen,
         navigationOptions: {
@@ -64,18 +73,21 @@ const TabNavigator = createBottomTabNavigator({
                     fontSize: 14,
                 },
             },
-            tabBarLabel: 'Setting'
+            tabBarLabel: 'Setting',
+            tabBarIcon: ({ tintColor }) => (
+                <Icon name="setting" size={40} style={{ color: tintColor }} type='AntDesign' />
+            )
         }
     },
 },
-{
-    initialRouteName: 'Room'
-});
+    {
+        initialRouteName: 'Room'
+    });
 
 const Private = createStackNavigator({
     Home: {
         screen: TabNavigator,
-        navigationOptions:{
+        navigationOptions: {
             header: null
         }
     }

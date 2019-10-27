@@ -38,7 +38,7 @@ app.group('/api/v2', (router) => {
     router.put('/customer/:id', authenticated, CustomerController.update)
 
     //Order
-    // router.get('/checkin', )
+    router.get('/checkin', authenticated, OrderCustomerController.index)
 })
 
 //STATIC FILE

@@ -2,7 +2,11 @@ const Customers = require('./../models').customer
 
 //SELECT ALL CUSTOMER
 exports.index = (req, res) => {
-    Customers.findAll()
+    Customers.findAll({
+        order: [
+            ['createdAt', 'DESC']
+        ]
+    })
         .then(function (result) {
             res.send(result)
         })
@@ -44,6 +48,7 @@ exports.update = (req, res) => {
     })
     .then(function(result){
         res.send({
+            ...req.body,
             message: `Update Customers with id ${id} has Success`
         })
     })

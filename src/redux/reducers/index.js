@@ -11,11 +11,15 @@ import reducerUser from './../reducers/reducersUser'
 import reducerRoom from './../reducers/reducersRoom'
 //Customer
 import reducersCustomer from './../reducers/reducersCustomer'
+//Orders
+import reducersOrders from './../reducers/reducersOrder'
+
 const appReducer = combineReducers({
     router: reducerRouter,
     users: reducerUser,
     room: reducerRoom,
-    customer: reducersCustomer
+    customer: reducersCustomer,
+    order: reducersOrders
 })
 
 export default appReducer

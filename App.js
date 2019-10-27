@@ -14,7 +14,6 @@ const mapStateToProps = state => ({
 });
 
 const AppWithNavigationState = connect(mapStateToProps)(AppNav);
-
 export default class App extends Component {
   render() {
     return (

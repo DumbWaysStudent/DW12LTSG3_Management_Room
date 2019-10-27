@@ -10,10 +10,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5,
     padding: 10,
-    height: 150,
+    height: 100,
   },
   itemName: {
-    fontSize: 40,
+    fontSize: 20,
     color: '#fff',
     fontWeight: '600',
   },
@@ -27,6 +27,11 @@ export const styles = StyleSheet.create({
     fontSize: 30,
     marginLeft:10,
     marginTop: 20,
+  },
+  titleR: {
+    fontWeight: 'bold',
+    fontSize: 30,
+    marginLeft:10,
   },
   modal:{
     backgroundColor: '#fff',
@@ -110,5 +115,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginLeft: 0,
+  },
+  btnRoom: {
+    backgroundColor: '#4b4b4b',
+    width: 100,
+    alignSelf: 'flex-end'
+  },
+  center: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    justifyContent: 'center',
   }
 })
