@@ -28,6 +28,42 @@ export default function reducersOrders(state = initialState, action){
                 isLoading: false,
                 isError: true
             }
+        case `${types.ADD_ORDER}_PENDING`:
+            return {
+                ...state,
+                isLoading: true,
+            }
+        case `${types.ADD_ORDER}_FULFILLED`:
+            return {
+                ...state,
+                isLoading: false,
+                isSuccess: true,
+                message: action.payload.data
+            }
+        case `${types.ADD_ORDER}_REJECTED`:
+            return {
+                ...state,
+                isLoading: false,
+                isError: true
+            }
+        case `${types.UPDATE_ORDER}_PENDING`:
+            return {
+                ...state,
+                isLoading: true,
+            }
+        case `${types.UPDATE_ORDER}_FULFILLED`:
+            return {
+                ...state,
+                isLoading: false,
+                isSuccess: true,
+                message: action.payload.data
+            }
+        case `${types.UPDATE_ORDER}_REJECTED`:
+            return {
+                ...state,
+                isLoading: false,
+                isError: true
+            }
         default :  
             return state
     }

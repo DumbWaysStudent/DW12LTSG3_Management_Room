@@ -13,36 +13,26 @@ export const handleGetCustomer = (token) => ({
     })
 })
 
-export const handleAddCustomer = (params) => ({
+export const handleAddCustomer = ({formDataCustomer, token}) => ({
     type: types.ADD_CUSTOMER,
     payload: Axios({
         method: 'post',
         url: `${API_URL}/api/v2/customer`,
         headers: {
-            Authorization: `Bearer ${params.token}`
+            Authorization: `Bearer ${token}`
         },
-        data: {
-            name: params.name,
-            id_card: params.id_card,
-            phone_number: params.phone_number,
-            image: params.image,
-        }
+        data: formDataCustomer
     })
 })
 
-export const handleEditCustomer = (params) => ({
+export const handleEditCustomer = ({id, formDataCustomer, token}) => ({
     type: types.UPDATE_CUSTOMER,
     payload: Axios({
-        method: 'put',
-        url: `${API_URL}/api/v2/customer/${params.id}`,
+        method: 'PATCH',
+        url: `${API_URL}/api/v2/customer/${id}`,
         headers: {
-            Authorization: `Bearer ${params.token}`
+            Authorization: `Bearer ${token}`
         },
-        data: {
-            name: params.name,
-            id_card: params.id_card,
-            phone_number: params.phone_number,
-            image: params.image,
-        }
+        data: formDataCustomer
     })
 })

@@ -6,7 +6,6 @@ module.exports = {
       room_id: 1,
       customer_id: 2,
       is_done: false,
-      is_booked: false,
       duration: 10,
       order_end_time: new Date()
     }], {});

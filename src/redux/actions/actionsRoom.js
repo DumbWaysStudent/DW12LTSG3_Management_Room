@@ -30,7 +30,7 @@ export const handleAddRoom = (params) => ({
 export const handleUpdateRoom = (params) =>({
     type: types.UPDATE_ROOM,
     payload: Axios({
-        method: 'put',
+        method: 'PATCH',
         url: `${API_URL}/api/v2/room/${params.id}`,
         headers:{
             Authorization: `Bearer ${params.token}`

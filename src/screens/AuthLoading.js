@@ -1,11 +1,11 @@
 import React from 'react'
 import {
     ActivityIndicator,
-    StatusBar,
-    View,
+    Text
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage'
 import { styles } from '../component/styles';
+import { Container } from 'native-base';
 
 export default class AuthLoadingScreen extends React.Component {
     componentDidMount() {
@@ -17,14 +17,10 @@ export default class AuthLoadingScreen extends React.Component {
     }
     render() {
         return (
-            <View
-                style={styles.activity}
-            >
-                <Container style={styles.center}>
-                    <ActivityIndicator size='large' />
-                    <Text>Please Wait...</Text>
-                </Container>
-            </View>
+            <Container style={[styles.activity]}>
+                <ActivityIndicator size='large' />
+                <Text>Please Wait...</Text>
+            </Container>
         )
     }
 }

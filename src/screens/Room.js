@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native'
 import { connect } from 'react-redux'
 import { FlatGrid } from 'react-native-super-grid'
@@ -10,9 +11,6 @@ import AsyncStorage from '@react-native-community/async-storage'
 import * as actionRoom from './../redux/actions/actionsRoom'
 import Modal from 'react-native-modal'
 import {
-    ActivityIndicator
-} from 'react-native'
-import {
     Container,
     Text,
     Button,
@@ -20,7 +18,12 @@ import {
     Item,
     Left,
     Body,
-    ListItem
+    Fab,
+    Icon,
+    ListItem,
+    Form,
+    Toast,
+    Label
 } from 'native-base'
 
 class Room extends Component {
@@ -42,6 +45,7 @@ class Room extends Component {
         })
         this.props.GetAllRoom(token)
     }
+    //--- Show Modal Edit Room --//
     edit(e) {
         const data = this.props.room.room
         const filter = data.filter(function (item) {
@@ -50,150 +54,194 @@ class Room extends Component {
         })
         this.setState({
             data: filter,
-            visibleModal: 'bottom',
+            visibleModal: 'fancy',
             isLoading: false
         })
     }
+    //--- Update List Room ---//
     update = () => {
         const token = this.state.token
         this.props.GetAllRoom(token)
     }
+    //--- Add Room ---//
     add() {
         this.setState({
-            visible: 'bottom'
+            visible: 'fancy'
         })
     }
-    saveEdit() {
-        this.props.EditRoom({
+    //--- Execute Edit Room ---//
+    saveEdit = async () => {
+        await this.props.EditRoom({
             id: this.state.data[0].id,
             name: this.state.name,
             token: this.state.token
         })
+        Toast.show({
+            text: 'Please Wait ....',
+            duration: 3000,
+            style: { margin: 20, borderRadius: 10 }
+        })
         this.setState({ visibleModal: null })
         const token = this.state.token
-        this.props.GetAllRoom(token)
+        await this.props.GetAllRoom(token)
     }
-    save() {
-        this.props.AddRoom({
+    //--- Execute Add Room ---//
+    save = async () => {
+        await this.props.AddRoom({
             name: this.state.name,
             token: this.state.token
+        })
+        Toast.show({
+            text: 'Please Wait ....',
+            duration: 3000,
+            style: { margin: 20, borderRadius: 10 }
         })
         this.setState({
             visible: null,
             name: ''
         })
         const token = this.state.token
-        this.props.GetAllRoom(token)
+        await this.props.GetAllRoom(token)
     }
     render() {
         const { isLoading } = this.state
-        const { isSuccess } = this.props.room
-        const Isloading = this.props.room.isLoading
-        return (
-            <Container>
-                <ListItem>
-                    <Left>
-                        <Text style={styles.titleR}>Room</Text>
-                    </Left>
-                    <Body>
-                        <Button
-                            style={styles.btnRoom}
-                            block
-                            small
-                            rounded
-                            onPress={() => this.add()}
-                        >
-                            <Text>Add Room</Text>
-                        </Button>
-                    </Body>
-                </ListItem>
-                {
-                    Isloading == false ?
-                        <FlatGrid
-                            itemDimension={130}
-                            items={this.props.room.room}
-                            style={styles.gridView}
-                            renderItem={({ item, index }) => (
-                                <TouchableOpacity
-                                    onPress={() => this.edit(item.id)}
-                                >
-                                    <View style={[styles.itemContainer, { backgroundColor: '#2ecc71' }]}>
-                                        <Text style={styles.itemName}>{item.name}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                        />
-                        :
+        const { isError } = this.props.room
+        const isLoadingData = this.props.room.isLoading
+        switch (isLoadingData) {
+            case true:
+                return (
+                    <Container style={styles.center}>
+                        <ActivityIndicator size='large' />
+                        <Text>Please Wait...</Text>
+                    </Container>
+                )
+                break;
+            case false:
+                if (isError == true) {
+                    return (
                         <Container style={styles.center}>
-                            <ActivityIndicator size='large' />
-                            <Text>Please Wait...</Text>
+                            <Text>404 Not Found</Text>
                         </Container>
-                }
-                <Modal
-                    isVisible={this.state.visibleModal}
-                    onSwipeComplete={() => this.setState({ visibleModal: null })}
-                    swipeDirection='down'
-                    style={styles.modal}
-                >
-                    <View style={styles.editroom}>
-                        <Text style={styles.titleEdit}>EDIT ROOM</Text>
-                        <Item>
-                            <Input
-                                defaultValue={isLoading == false ? this.state.data[0].name : null}
-                                onChangeText={(text) => this.setState({ name: text })}
-                            />
-                        </Item>
-                    </View>
-                    <Button
-                        onPress={() => this.saveEdit()}
-                        style={styles.addbutton}
-                        success
-                        full>
-                        <Text>Edit</Text>
-                    </Button>
-                    <Button
-                        onPress={() => this.setState({ visibleModal: null })}
-                        style={styles.addbutton}
-                        danger
-                        full>
-                        <Text>Cancel</Text>
-                    </Button>
-                </Modal>
+                    )
+                } else {
+                    return (
+                        <Container>
+                            <ListItem>
+                                <Left>
+                                    <Text style={styles.titleR}>Room</Text>
+                                </Left>
+                                <Body>
+                                    <Button
+                                        style={styles.btnRoom}
+                                        block
+                                        small
+                                        rounded
+                                        onPress={() => this.add()}
+                                    >
+                                        <Icon name='plus' type='FontAwesome' />
+                                        <Text style={{ fontWeight: 'bold', paddingLeft: 0 }}>Add Room</Text>
+                                    </Button>
+                                </Body>
+                            </ListItem>
+                            {
+                                this.props.room.room == '' ?
+                                    <Text style={styles.nodata}>No result data</Text>
+                                    :
+                                    <FlatGrid
+                                        refreshing={isLoadingData}
+                                        onRefresh={this.update}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        itemDimension={130}
+                                        items={this.props.room.room}
+                                        style={styles.gridView}
+                                        renderItem={({ item, index }) => (
+                                            <TouchableOpacity
+                                                onPress={() => this.edit(item.id)}
+                                            >
+                                                <View style={[styles.itemContainer, { backgroundColor: '#2ecc71' }]}>
+                                                    <Text style={styles.itemName}>{item.name}</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        )}
+                                    />
+                            }
 
-                {/* MODAL ADD */}
-                <Modal
-                    isVisible={this.state.visible}
-                    onSwipeComplete={() => this.setState({ visible: null })}
-                    swipeDirection='down'
-                    style={styles.modal}
-                >
-                    <View style={styles.viewmodal}>
-                        <Item
-                            style={styles.itemadd}
-                        >
-                            <Input
-                                style={styles.addtext}
-                                onChangeText={(name) => this.setState({ name })}
-                            />
-                        </Item>
-                        <Button
-                            onPress={() => this.save()}
-                            style={styles.addbutton}
-                            success
-                            full>
-                            <Text>Add</Text>
-                        </Button>
-                        <Button
-                            onPress={() => this.setState({ visible: null })}
-                            style={styles.addbutton}
-                            danger
-                            full>
-                            <Text>Cancel</Text>
-                        </Button>
-                    </View>
-                </Modal>
-            </Container>
-        )
+                            <Modal
+                                isVisible={this.state.visibleModal}
+                                onSwipeComplete={() => this.setState({ visibleModal: null })}
+                                swipeDirection='down'
+                                style={[styles.modal]}
+                                hasBackdrop={false}
+                                onBackButtonPress={() => this.setState({ visible: '' })}
+                                onBackdropPress={()=> this.setState({ visible: '' })}
+                            >
+                                <Container style={styles.modalGeneral}>
+                                    <Text style={styles.titleModal}>EDIT ROOM</Text>
+                                    <Item style={[styles.margin, { marginTop: 20 }, styles.item]}>
+                                        <Input
+                                            style={styles.inputLight}
+                                            defaultValue={isLoading == false ? this.state.data[0].name : null}
+                                            onChangeText={(text) => this.setState({ name: text })}
+                                        />
+                                    </Item>
+                                    <Fab position='topRight' style={styles.btnclose}
+                                        onPress={() => this.setState({ visibleModal: '', isLoading: true })}
+                                    >
+                                        <Icon name='cross' type='Entypo' style={{ color: '#3d3d3d' }} />
+                                    </Fab>
+                                    <Button
+                                        onPress={() => this.saveEdit()}
+                                        style={styles.addbutton}
+                                        rounded>
+                                        <Text style={{ color: '#3d3d3d', fontWeight: 'bold' }}>Edit</Text>
+                                        <Icon name='rightcircle' type='AntDesign' style={{ color: '#3d3d3d' }} />
+                                    </Button>
+                                </Container>
+
+                            </Modal>
+
+                            {/* MODAL ADD */}
+                            <Modal
+                                isVisible={this.state.visible}
+                                onSwipeComplete={() => this.setState({ visible: '' })}
+                                swipeDirection='down'
+                                style={[styles.modal]}
+                                hasBackdrop={false}
+                                onBackButtonPress={() => this.setState({ visible: '' })}
+                                onBackdropPress={()=> this.setState({ visible: '' })}
+                            >
+                                <Container style={styles.modalGeneral}>
+                                    <Text style={styles.titleModal}>
+                                        Add Room
+                                    </Text>
+                                    <Form style={{ marginTop: 10 }}>
+                                        <Label style={styles.margin}>Room Name</Label>
+                                        <Item style={styles.item} >
+                                            <Input
+                                                style={styles.inputLight}
+                                                onChangeText={(name) => this.setState({ name })}
+                                            />
+                                        </Item>
+                                        <Button
+                                            rounded={true}
+                                            onPress={() => this.save()}
+                                            style={styles.addbutton}
+                                        >
+                                            <Text style={{ color: '#3b3b3b', fontWeight: 'bold' }}>Add</Text>
+                                            <Icon name='rightcircle' type='AntDesign' style={{ color: '#3d3d3d' }} />
+                                        </Button>
+                                    </Form>
+                                    <Fab position='topRight' style={styles.btnclose}
+                                        onPress={() => this.setState({ visible: '', isLoad: true })}
+                                    >
+                                        <Icon name='cross' type='Entypo' style={{ color: '#3d3d3d' }} />
+                                    </Fab>
+                                </Container>
+                            </Modal>
+                        </Container>
+                    )
+                }
+        }
     }
 }
 

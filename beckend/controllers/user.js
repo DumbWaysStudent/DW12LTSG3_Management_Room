@@ -2,6 +2,22 @@ const User = require('../models').user
 const multer = require('multer');
 const path = require('path');
 
+exports.GetProfile = (req, res) => {
+    const id = req.user.userId
+    User.findOne({
+        where:{id}
+    })
+    .then(function(result){
+        res.send(result)
+    })
+    .catch(function(err){
+        res.send({
+            message: 'Error cant find',
+            err
+        })
+    })
+}
+
 exports.getDataUser = (req, res) => {
     const id = req.params.userId
     User.findOne({

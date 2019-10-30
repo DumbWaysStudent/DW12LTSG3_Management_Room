@@ -22,7 +22,8 @@ exports.index = (req, res) =>{
 exports.store = (req, res) => {
     const name = req.body.name
     Room.create({
-        name
+        name,
+        is_booked: false
     })
     .then(function(result){
         res.send({
@@ -43,7 +44,8 @@ exports.update = (req, res) => {
     const id = req.params.id
     const name = req.body.name
     Room.update({
-        name
+        name,
+        is_booked: false
     },
     {
         where: {id}

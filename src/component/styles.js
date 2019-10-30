@@ -6,8 +6,8 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   itemContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
     borderRadius: 5,
     padding: 10,
     height: 100,
@@ -34,11 +34,8 @@ export const styles = StyleSheet.create({
     marginLeft:10,
   },
   modal:{
-    backgroundColor: '#fff',
-    margin:0,
-    marginTop: 100,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   scrollableModal: {
     height: 300,
@@ -84,7 +81,12 @@ export const styles = StyleSheet.create({
   },
   addbutton: {
     marginLeft: 20,
-    marginRight: 20
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    color: '#4b4b4b',
+    padding:0,
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end'
   },
   login: {
     justifyContent: 'center',
@@ -117,13 +119,55 @@ export const styles = StyleSheet.create({
     marginLeft: 0,
   },
   btnRoom: {
-    backgroundColor: '#4b4b4b',
-    width: 100,
+    backgroundColor: '#3d3d3d',
+    width: 130,
     alignSelf: 'flex-end'
   },
   center: {
     alignItems: 'center',
     alignSelf: 'center',
     justifyContent: 'center',
+  },
+  titleModal: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: '600',
+  },
+  modalGeneral: {
+    backgroundColor: '#3d3d3d',
+    padding: 20,
+    borderRadius: 20,
+  },
+  btnclose: {
+    backgroundColor: '#fff',
+    width: 40,
+    height: 40,
+    top: 0
+  },
+  inputLight:{
+    backgroundColor: '#fff',
+    color: '#3d3d3d',
+    fontWeight: 'bold',
+    paddingLeft: 10,
+    borderRadius: 10
+  },
+  item: {
+    borderBottomWidth: 0,
+    height:80,
+    marginLeft: 0,
+  },
+  margin: {
+    marginTop:0,
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+  colorWhite: {
+    color: '#3d3d3d',
+    backgroundColor: '#fff',
+    fontWeight: 'bold',
+  },
+  nodata: {
+    margin:20,
+    fontSize: 15
   }
 })

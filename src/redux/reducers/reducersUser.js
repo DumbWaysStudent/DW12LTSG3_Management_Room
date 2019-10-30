@@ -45,6 +45,24 @@ export default function reducersUser(state = initialState, action) {
                 isLoading: false,
                 isError: true
             }
+        case `${types.GET_USERS}_PENDING`:
+            return {
+                ...state,
+                isLoading: true,
+            }
+        case `${types.GET_USERS}_FULFILLED`:
+            return {
+                ...state,
+                isLoading: false,
+                isSuccess: true,
+                users: action.payload.data
+            }
+        case `${types.GET_USERS}_REJECTED`:
+            return {
+                ...state,
+                isLoading: false,
+                isError: true
+            }
         default:
             return state
     }

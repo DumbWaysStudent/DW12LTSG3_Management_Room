@@ -11,6 +11,9 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
+      is_booked: {
+        type: Sequelize.BOOLEAN
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -14,4 +14,13 @@ export const handleLogin = (params) => ({
     })
 })
 
-
+export const handleGetProfile = (token) => ({
+    type: types.GET_USERS,
+    payload: Axios({
+        method: 'GET',
+        url: `${API_URL}/api/v2/user`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+})

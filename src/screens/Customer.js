@@ -5,11 +5,10 @@ import { styles } from './../component/styles'
 import * as actionCustomer from './../redux/actions/actionsCustomer'
 import AsyncStorage from '@react-native-community/async-storage'
 import Modal from 'react-native-modal'
+import ImagePicker from 'react-native-image-picker'
 import {
     FlatList,
     ActivityIndicator,
-    TouchableOpacity,
-    View,
     Image
 } from 'react-native'
 import {
@@ -20,15 +19,16 @@ import {
     Icon,
     Item,
     Input,
-    Card,
     Left,
-    Right,
-    CardItem,
     ListItem,
     List,
     Thumbnail,
     Body,
+    Form,
+    Label,
+    Toast
 } from 'native-base'
+import { API_URL } from '../component/host'
 
 class CustomerScreen extends Component {
     constructor() {
@@ -42,6 +42,7 @@ class CustomerScreen extends Component {
             idcard: '',
             phonenumber: '',
             image: '',
+            fileName: '',
             data: ''
         }
     }
@@ -52,31 +53,70 @@ class CustomerScreen extends Component {
         })
         this.props.GetAllCustomer(token)
     }
-    update = () => {
-        const token = this.state.token
-        this.props.GetAllCustomer(token)
+    //--- Select Image ---//
+    selectImage = () => {
+        const options = {
+            quality: 1.0,
+            maxWidth: 500,
+            maxHeight: 500,
+            storageOptions: {
+                skipBackup: true,
+            },
+        };
+        ImagePicker.showImagePicker(options, res => {
+            const source = res.uri
+            const fileName = res.fileName
+            if (!res.didCancel) {
+                if (!res.error) {
+                    this.setState({
+                        image: source,
+                        fileName
+                    })
+                }
+            }
+        })
     }
+    //--- Update List Customer ---//
+    update = async () => {
+        const token = this.state.token
+        await this.props.GetAllCustomer(token)
+    }
+    //--- Modal Add Customer ---//
     showAddModel() {
         this.setState({
             visible: 'bottom'
         })
     }
-    save() {
-        this.props.AddCustomer({
-            name: this.state.name,
-            id_card: this.state.idcard,
-            phone_number: this.state.phonenumber,
-            image: this.state.image,
+    //--- Execute Add Customer ---//
+    save = async () => {
+        const formDataCustomer = new FormData()
+        formDataCustomer.append('image', {
+            uri: this.state.image,
+            type: 'image/jpeg',
+            name: this.state.fileName
+        })
+        formDataCustomer.append('name', this.state.name)
+        formDataCustomer.append('id_card', this.state.idcard)
+        formDataCustomer.append('phone_number', this.state.phonenumber)
+        await this.props.AddCustomer({
+            formDataCustomer,
             token: this.state.token
+        })
+        Toast.show({
+            text: 'Please Wait ....',
+            duration: 3000,
+            style: { margin: 20, borderRadius: 10 }
         })
         this.setState({
             name: '',
             id_card: '',
             phone_number: '',
             image: '',
+            visible: ''
         })
         this.update()
     }
+    //--- Show Modal Edit ---//
     showEdit(e) {
         const data = this.props.customer.customer
         const filter = data.filter(function (item) {
@@ -89,173 +129,243 @@ class CustomerScreen extends Component {
             isLoading: false
         })
     }
-    saveEdit() {
-        this.props.EditCustomer({
+    //--- Execute Edit ---//
+    saveEdit = async () => {
+        const formDataCustomer = new FormData()
+        formDataCustomer.append('image', {
+            uri: this.state.image,
+            type: 'image/jpeg',
+            name: this.state.fileName
+        })
+        formDataCustomer.append('name',
+            this.state.name == '' ? this.state.data[0].name : this.state.name)
+        formDataCustomer.append('id_card', this.state.idcard == '' ?
+            this.state.data[0].id_card : this.state.idcard)
+        formDataCustomer.append('phone_number',
+            this.state.phonenumber == '' ? this.state.data[0].phone_number : this.state.phonenumber)
+        await this.props.EditCustomer({
             id: this.state.data[0].id,
-            name: this.state.name,
-            id_card: this.state.idcard,
-            phone_number: this.state.phonenumber,
-            image: this.state.image,
+            formDataCustomer,
             token: this.state.token
         })
+        Toast.show({
+            text: 'Please Wait ....',
+            duration: 3000,
+            style: { margin: 20, borderRadius: 10 }
+        })
         this.setState({
-            visibleE: null,
+            visibleE: '',
+            image: '',
             isLoading: true
         })
         this.update()
     }
     render() {
-        const { isLoading } = this.state
+        const { isLoading, image } = this.state
         const isLoadingA = this.props.customer.isLoading
-        return (
-            <Container>
-                <Text style={styles.title}>
-                    Customers
-                </Text>
-                {
-                    isLoadingA == false ?
-                        <FlatList
-                            keyExtractor={(item, index) => index.toString()}
-                            refreshing={isLoadingA}
-                            onRefresh={this.update}
-                            data={this.props.customer.customer}
-                            renderItem={({ item, index }) => (
-                                <List key={item.id}>
-                                    <ListItem thumbnail onPress={() => this.showEdit(item.id)}>
-                                        <Left>
-                                            <Thumbnail square />
-                                        </Left>
-                                        <Body>
-                                            <Text>{item.name}</Text>
-                                            <Text note numberOfLines={1}>ID CARD : {item.id_card}</Text>
-                                            <Text note numberOfLines={2}>Phone Number :{item.phone_number}</Text>
-                                        </Body>
-                                    </ListItem>
-                                </List>
-                            )}
-                        />
-                        :
+        const { isError } = this.props.customer
+        switch (isLoadingA) {
+            case true:
+                return (
+                    <Container style={styles.center}>
+                        <ActivityIndicator size='large' />
+                        <Text>Please Wait...</Text>
+                    </Container>
+                )
+                break;
+            case false:
+                if (isError == true) {
+                    return (
                         <Container style={styles.center}>
-                            <ActivityIndicator size='large' />
-                            <Text>Please Wait...</Text>
+                            <Text>404 Not Found</Text>
                         </Container>
+                    )
+                } else {
+                    return (
+                        <Container>
+                            <ListItem>
+                                <Left>
+                                    <Text style={styles.titleR}>Customers</Text>
+                                </Left>
+                            </ListItem>
+                            {
+                                this.props.customer.customer == '' ?
+                                    <Text style={styles.nodata}>No result data</Text>
+                                    :
+                                    <FlatList
+                                        keyExtractor={(item, index) => index.toString()}
+                                        refreshing={isLoadingA}
+                                        onRefresh={this.update}
+                                        data={this.props.customer.customer}
+                                        renderItem={({ item, index }) => (
+                                            <List key={item.id}>
+                                                <ListItem thumbnail onPress={() => this.showEdit(item.id)}>
+                                                    <Left>
+                                                        <Thumbnail square source={{ uri: `${API_URL}/${item.image}` }} />
+                                                    </Left>
+                                                    <Body>
+                                                        <Text>{item.name}</Text>
+                                                        <Text note numberOfLines={1}>ID CARD : {item.id_card}</Text>
+                                                        <Text note numberOfLines={2}>Phone Number :{item.phone_number}</Text>
+                                                    </Body>
+                                                </ListItem>
+                                            </List>
+                                        )}
+                                    />
+                            }
+
+                            <Fab position='bottomRight'
+                                onPress={() => this.showAddModel()}
+                                style={{ backgroundColor: '#4b4b4b' }}
+                            >
+                                <Icon name='ios-add' />
+                            </Fab>
+
+                            {/* MODAL ADD */}
+                            <Modal
+                                isVisible={this.state.visible}
+                                onSwipeComplete={() => this.setState({ visible: '' })}
+                                swipeDirection='down'
+                                style={styles.modal}
+                                hasBackdrop={false}
+                                onBackButtonPress={() => this.setState({ visible: '' })}
+                                onBackdropPress={()=> this.setState({ visible: '' })}
+                                avoidKeyboard={true}
+
+                            >
+                                <Container style={styles.modalGeneral}>
+                                    <Text style={styles.titleModal}>Add Customer</Text>
+                                    <Form style={{ marginTop: 10 }}>
+                                        <Label style={styles.margin}>Name</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                placeholder="NAME"
+                                                placeholderTextColor='#fff'
+                                                onChangeText={(name) => this.setState({ name })}
+                                            />
+                                        </Item>
+                                        <Label style={styles.margin}>ID Card</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                keyboardType='numeric'
+                                                placeholder="ID CARD"
+                                                keyboardType='numeric'
+                                                placeholderTextColor='#fff'
+                                                onChangeText={(text) => this.setState({ idcard: text })}
+                                            />
+                                        </Item>
+                                        <Label style={styles.margin}>Phone Number</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                keyboardType='numeric'
+                                                placeholder="PHONE NUMBER"
+                                                keyboardType='numeric'
+                                                placeholderTextColor='#fff'
+                                                onChangeText={(text) => this.setState({ phonenumber: text })}
+                                            />
+                                        </Item>
+                                        {image ?
+                                            <Image source={{ uri: `${image}` }} style={{ height: 200, borderRadius: 20 }} />
+                                            : null}
+                                        <Item style={[styles.item, { justifyContent: 'flex-end' }]}>
+                                            <Button style={styles.addbutton} rounded onPress={() => this.selectImage()}>
+                                                <Text style={{ color: '#3b3b3b', fontWeight: 'bold' }}>ADD IMAGE</Text>
+                                                <Icon name='image' type='FontAwesome' style={{ color: '#3d3d3d' }} />
+                                            </Button>
+                                        </Item>
+                                        <Button
+                                            rounded
+                                            onPress={() => this.save()}
+                                            style={styles.addbutton}
+                                            success>
+                                            <Text style={{ color: '#3b3b3b', fontWeight: 'bold' }}>Add</Text>
+                                            <Icon name='rightcircle' type='AntDesign' style={{ color: '#3d3d3d' }} />
+                                        </Button>
+                                    </Form>
+                                    <Fab position='topRight' style={styles.btnclose}
+                                        onPress={() => this.setState({ visible: '', isLoad: true })}
+                                    >
+                                        <Icon name='cross' type='Entypo' style={{ color: '#3d3d3d' }} />
+                                    </Fab>
+                                </Container>
+                            </Modal>
+
+                            {/* MODAL EDIT */}
+                            <Modal
+                                isVisible={this.state.visibleE}
+                                onSwipeComplete={() => this.setState({ visibleE: null })}
+                                swipeDirection='down'
+                                style={styles.modal}
+                                hasBackdrop={false}
+                                onBackButtonPress={() => this.setState({ visible: '' })}
+                                onBackdropPress={()=> this.setState({ visible: '' })}
+                                avoidKeyboard={true}
+                            >
+                                <Container style={styles.modalGeneral}>
+                                    <Text style={styles.titleModal}>Edit Customer</Text>
+                                    <Form style={{ marginTop: 10 }}>
+                                        <Label style={styles.margin}>Name</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                placeholderTextColor='#fff'
+                                                defaultValue={isLoading == false ? this.state.data[0].name : null}
+                                                onChangeText={(name) => this.setState({ name })}
+                                            />
+                                        </Item>
+                                        <Label style={styles.margin}>ID Card</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                placeholderTextColor='#fff'
+                                                defaultValue={isLoading == false ? this.state.data[0].id_card : null}
+                                                onChangeText={(text) => this.setState({ idcard: text })}
+
+                                            />
+                                        </Item>
+                                        <Label style={styles.margin}>Phone Number</Label>
+                                        <Item style={styles.item}>
+                                            <Input
+                                                style={styles.inputLight}
+                                                placeholderTextColor='#fff'
+                                                defaultValue={isLoading == false ? this.state.data[0].phone_number : null}
+                                                onChangeText={(text) => this.setState({ phonenumber: text })}
+                                            />
+                                        </Item>
+
+                                        {image ?
+                                            <Image source={{ uri: `${image}` }} style={{ height: 200, borderRadius: 20 }} />
+                                            : null}
+                                        <Item style={[styles.item, { justifyContent: 'flex-end' }]}>
+                                            <Button style={styles.addbutton} rounded onPress={() => this.selectImage()}>
+                                                <Text style={{ color: '#3b3b3b', fontWeight: 'bold' }}>ADD IMAGE</Text>
+                                                <Icon name='image' type='FontAwesome' style={{ color: '#3d3d3d' }} />
+                                            </Button>
+                                        </Item>
+                                        <Button
+                                            rounded
+                                            onPress={() => this.saveEdit()}
+                                            style={styles.addbutton}
+                                            success>
+                                            <Text style={{ color: '#3b3b3b', fontWeight: 'bold' }}>Save</Text>
+                                            <Icon name='rightcircle' type='AntDesign' style={{ color: '#3d3d3d' }} />
+                                        </Button>
+                                    </Form>
+                                    <Fab position='topRight' style={styles.btnclose}
+                                        onPress={() => this.setState({ visibleE: '', isLoad: true })}
+                                    >
+                                        <Icon name='cross' type='Entypo' style={{ color: '#3d3d3d' }} />
+                                    </Fab>
+                                </Container>
+                            </Modal>
+                        </Container>
+                    )
                 }
-                <Fab
-                    position='bottomRight'
-                    onPress={() => this.showAddModel()}
-                    style={{backgroundColor: '#4b4b4b'}}
-                >
-                    <Icon name='ios-add' />
-                </Fab>
-
-                {/* MODAL ADD */}
-                <Modal
-                    isVisible={this.state.visible}
-                    onSwipeComplete={() => this.setState({ visible: null })}
-                    swipeDirection='down'
-                    style={styles.modal}
-                >
-                    <View style={styles.viewmodal}>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="NAME"
-                                placeholderTextColor='#fff'
-                                onChangeText={(name) => this.setState({ name })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="ID CARD"
-                                placeholderTextColor='#fff'
-                                onChangeText={(text) => this.setState({ idcard: text })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="PHONE NUMBER"
-                                placeholderTextColor='#fff'
-                                onChangeText={(text) => this.setState({ phonenumber: text })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Button><Text>ADD IMAGE</Text></Button>
-                        </Item>
-                        <Button
-                            onPress={() => this.save()}
-                            style={styles.addbutton}
-                            success
-                            full>
-                            <Text>Add</Text>
-                        </Button>
-                        <Button
-                            onPress={() => this.setState({ visible: null })}
-                            style={styles.addbutton}
-                            danger
-                            full>
-                            <Text>Cancel</Text>
-                        </Button>
-                    </View>
-                </Modal>
-
-                {/* MODAL EDIT */}
-                <Modal
-                    isVisible={this.state.visibleE}
-                    onSwipeComplete={() => this.setState({ visibleE: null })}
-                    swipeDirection='down'
-                    style={styles.modal}
-                >
-                    <View style={styles.viewmodal}>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="NAME"
-                                placeholderTextColor='#fff'
-                                defaultValue={isLoading == false ? this.state.data[0].name : null}
-                                onChangeText={(name) => this.setState({ name })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="ID CARD"
-                                placeholderTextColor='#fff'
-                                defaultValue={isLoading == false ? this.state.data[0].id_card : null}
-                                onChangeText={(text) => this.setState({ idcard: text })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Input
-                                style={styles.addtext}
-                                placeholder="PHONE NUMBER"
-                                placeholderTextColor='#fff'
-                                defaultValue={isLoading == false ? this.state.data[0].phone_number : null}
-                                onChangeText={(text) => this.setState({ phonenumber: text })}
-                            />
-                        </Item>
-                        <Item style={styles.itemadd}>
-                            <Button><Text>ADD IMAGE</Text></Button>
-                        </Item>
-                        <Button
-                            onPress={() => this.saveEdit()}
-                            style={styles.addbutton}
-                            success
-                            full>
-                            <Text>Edit</Text>
-                        </Button>
-                        <Button
-                            onPress={() => this.setState({ visibleE: null })}
-                            style={styles.addbutton}
-                            danger
-                            full>
-                            <Text>Cancel</Text>
-                        </Button>
-                    </View>
-                </Modal>
-            </Container>
-        )
+                break;
+        }
     }
 }
 
@@ -268,7 +378,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         GetAllCustomer: (token) => dispatch(actionCustomer.handleGetCustomer(token)),
-        AddCustomer: (params) => dispatch(actionCustomer.handleAddCustomer(params)),
+        AddCustomer: ({ formDataCustomer, token }) => dispatch(actionCustomer.handleAddCustomer({ formDataCustomer, token })),
         EditCustomer: (params) => dispatch(actionCustomer.handleEditCustomer(params)),
     }
 }

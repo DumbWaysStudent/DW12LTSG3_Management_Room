@@ -14,22 +14,12 @@ module.exports = {
         references: {
           model: 'rooms',
           key: 'id'
-      },
-      onUpdate: 'cascade',
+      }
       },
       customer_id: {
         type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'customers',
-          key: 'id'
-      },
-      onUpdate: 'cascade',
       },
       is_done: {
-        type: Sequelize.BOOLEAN
-      },
-      is_booked: {
         type: Sequelize.BOOLEAN
       },
       duration: {

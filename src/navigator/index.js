@@ -76,8 +76,8 @@ const TabNavigator = createBottomTabNavigator({
             tabBarLabel: 'Setting',
             tabBarIcon: ({ tintColor }) => (
                 <Icon name="setting" size={40} style={{ color: tintColor }} type='AntDesign' />
-            )
-        }
+            ),
+        },
     },
 },
     {

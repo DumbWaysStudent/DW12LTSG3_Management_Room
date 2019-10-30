@@ -1,4 +1,3 @@
-import { createLogger } from 'redux-logger'
 import promise from 'redux-promise-middleware'
 import { createReactNavigationReduxMiddleware } from 'react-navigation-redux-helpers'
 
@@ -9,9 +8,9 @@ const reactNavigation = createReactNavigationReduxMiddleware(
     "root"
 )
 
-if (__DEV__) {
-    middleware.push(createLogger())
-}
+// if (__DEV__) {
+//     middleware.push(createLogger())
+// }
 
 
 middleware.push(reactNavigation)

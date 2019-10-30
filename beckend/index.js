@@ -21,24 +21,29 @@ const AuthController = require('./controllers/auth')
 const RoomController = require('./controllers/room')
 const CustomerController = require('./controllers/customers')
 const OrderCustomerController = require('./controllers/order')
+const UsersController = require('./controllers/user')
 
 //API V2
 app.group('/api/v2', (router) => {
+    //Users
+    router.get('/user',authenticated, UsersController.GetProfile)
     router.post('/login', AuthController.login)
     router.post('/register', AuthController.register)
 
     //Room
     router.get('/rooms', authenticated, RoomController.index)
     router.post('/room', authenticated, RoomController.store)
-    router.put('/room/:id', authenticated, RoomController.update)
+    router.patch('/room/:id', authenticated, RoomController.update)
 
     //Customer
     router.get('/customers', authenticated, CustomerController.index)
     router.post('/customer', authenticated, CustomerController.store)
-    router.put('/customer/:id', authenticated, CustomerController.update)
+    router.patch('/customer/:id', authenticated, CustomerController.update)
 
     //Order
     router.get('/checkin', authenticated, OrderCustomerController.index)
+    router.post('/checkin', authenticated, OrderCustomerController.store)
+    router.delete('/checkin/:id', authenticated, OrderCustomerController.update)
 })
 
 //STATIC FILE
