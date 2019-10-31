@@ -44,8 +44,11 @@ Light Coworking space is a platform android for booking room, and management boo
 * and create a new project Express for backend
   https://expressjs.com/
   
+## Installation With Apk
+* Download ./LightCoworkingSpace.apk in repository
 
-## Installation & Configuration
+
+## Installation & Configuration When Development
 Follow these step to install
 
 **Frontend:**
